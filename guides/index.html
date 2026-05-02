@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>转型指南 - optpad</title>
+<meta name="description" content="AI 时代职业转型指南，分享转型经验与心得">
+<meta property="og:title" content="转型指南 - optpad">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --bg: #0a0a0f; --bg2: #12121a; --bg3: #1a1a2e; --fg: #e0e0e8; --fg2: #888894; --accent: #6366f1; --accent2: #818cf8; }
+body { background: var(--bg); color: var(--fg); font-family: -apple-system, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; min-height: 100vh; }
+.container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--accent2); text-decoration: none; font-size: 14px; margin-bottom: 24px; }
+.back-link:hover { text-decoration: underline; }
+h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+.subtitle { color: var(--fg2); font-size: 15px; margin-bottom: 32px; }
+.guide-list { display: flex; flex-direction: column; gap: 16px; }
+.guide-card { background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 24px; transition: all 0.2s; cursor: pointer; }
+.guide-card:hover { background: var(--bg3); border-color: rgba(255,255,255,0.1); }
+.guide-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.guide-card .meta { font-size: 12px; color: var(--fg2); margin-bottom: 12px; display: flex; gap: 16px; }
+.guide-card .meta span { display: flex; align-items: center; gap: 4px; }
+.guide-card .content { font-size: 14px; color: var(--fg2); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.guide-card .tags { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+.guide-card .tag { padding: 4px 10px; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); border-radius: 12px; font-size: 11px; color: var(--accent2); }
+.write-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--accent); border: none; color: #fff; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; margin-bottom: 24px; }
+.write-btn:hover { background: var(--accent2); }
+.modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.modal-content { background: var(--bg2); border-radius: 16px; padding: 32px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; }
+.modal-content h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+.modal-content input, .modal-content textarea, .modal-content select { width: 100%; padding: 12px; background: var(--bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--fg); font-size: 14px; margin-bottom: 16px; font-family: inherit; }
+.modal-content textarea { min-height: 200px; resize: vertical; }
+.modal-content button { padding: 12px 24px; background: var(--accent); border: none; color: #fff; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
+.modal-content .cancel { background: var(--bg3); margin-left: 8px; }
+.loading { text-align: center; padding: 60px 20px; color: var(--fg2); }
+.footer { text-align: center; padding: 40px 20px; color: var(--fg2); font-size: 12px; border-top: 1px solid rgba(255,255,255,0.04); margin-top: 40px; }
+.footer a { color: var(--accent2); text-decoration: none; }
+@media (max-width: 640px) { .container { padding: 24px 16px; } h1 { font-size: 24px; } .guide-card { padding: 16px; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back-link">← 返回首页</a>
+  <h1>📚 转型指南</h1>
+  <p class="subtitle">分享 AI 时代职业转型经验，帮助更多人找到新方向</p>
+  
+  <button class="write-btn" id="writeBtn" onclick="window.showGuideModal()">✍️ 写指南</button>
+  
+  <div class="guide-list" id="guideList">
+    <div class="loading">加载中...</div>
+  </div>
+</div>
+
+<footer class="footer">
+  <p>optpad.com · AI 就业情报平台 · <a href="https://github.com/xiaochenMate/ai-jobs-cn">GitHub</a></p>
+</footer>
+
+<script src="/frontend/user-auth.js"></script>
+<script>
+const API = '/api/user';
+
+async function loadGuides() {
+  const list = document.getElementById('guideList');
+  try {
+    const { data: guides } = await fetch(`${API}/guides?sort=created_at`).then(r => r.json());
+    if (guides.length === 0) {
+      list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--fg2);">暂无指南，快来分享你的转型经验吧！</div>';
+      return;
+    }
+    list.innerHTML = guides.map(g => `
+      <div class="guide-card" onclick="window.location.href='/guides/detail.html?id=${g.id}'">
+        <h3>${g.title}</h3>
+        <div class="meta">
+          <span>👤 ${g.username}</span>
+          <span>📅 ${new Date(g.created_at).toLocaleDateString('zh-CN')}</span>
+          <span>👁️ ${g.views}</span>
+          <span>❤️ ${g.likes}</span>
+        </div>
+        <div class="content">${g.content}</div>
+        ${g.tags ? `<div class="tags">${g.tags.split(',').map(t => `<span class="tag">${t}</span>`).join('')}</div>` : ''}
+      </div>
+    `).join('');
+  } catch (e) {
+    list.innerHTML = `<div style="text-align:center;padding:40px;color:#ef4444;">加载失败：${e.message}</div>`;
+  }
+}
+
+window.showGuideModal = function() {
+  if (!window.optpadAuth.state.user) {
+    window.optpadAuth.showAuthModal();
+    return;
+  }
+  
+  let m = document.getElementById('guideModal'); if (m) m.remove();
+  m = document.createElement('div'); m.className = 'modal'; m.id = 'guideModal';
+  m.innerHTML = `
+    <div class="modal-content">
+      <h2>✍️ 写转型指南</h2>
+      <input type="text" id="guideTitle" placeholder="标题">
+      <select id="guideCategory">
+        <option value="转型经验">转型经验</option>
+        <option value="技能学习">技能学习</option>
+        <option value="求职心得">求职心得</option>
+        <option value="行业分析">行业分析</option>
+      </select>
+      <input type="text" id="guideTags" placeholder="标签（逗号分隔，如：AI,Python,转行）">
+      <textarea id="guideContent" placeholder="分享你的转型经验..."></textarea>
+      <button onclick="window.submitGuide()">发布</button>
+      <button class="cancel" onclick="this.closest('.modal').remove()">取消</button>
+    </div>
+  `;
+  document.body.appendChild(m);
+  m.onclick = (e) => { if (e.target === m) m.remove(); };
+};
+
+window.submitGuide = async function() {
+  const title = document.getElementById('guideTitle').value;
+  const category = document.getElementById('guideCategory').value;
+  const tags = document.getElementById('guideTags').value;
+  const content = document.getElementById('guideContent').value;
+  
+  if (!title || !content) { alert('请填写标题和内容'); return; }
+  
+  try {
+    await fetch(`${API}/guides`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.optpadAuth.state.token}` },
+      body: JSON.stringify({ title, content, category, tags }),
+    }).then(r => r.json());
+    
+    document.getElementById('guideModal').remove();
+    loadGuides();
+  } catch (e) {
+    alert(e.message);
+  }
+};
+
+// 初始化
+loadGuides();
+</script>
+</body>
+</html>

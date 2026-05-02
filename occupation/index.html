@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>职业详情 - optpad</title>
+<meta name="description" content="AI 职业暴露度详情">
+<meta property="og:title" content="职业详情 - optpad">
+<meta property="og:description" content="AI 职业暴露度详情">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #0a0a0f;
+  --bg2: #12121a;
+  --bg3: #1a1a2e;
+  --fg: #e0e0e8;
+  --fg2: #888894;
+  --accent: #6366f1;
+  --accent2: #818cf8;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --success: #10b981;
+}
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  min-height: 100vh;
+}
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent2);
+  text-decoration: none;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+.back-link:hover { text-decoration: underline; }
+.occupation-header {
+  margin-bottom: 32px;
+}
+.occupation-header h1 {
+  font-size: 36px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.occupation-header .category {
+  font-size: 14px;
+  color: var(--fg2);
+}
+.score-card {
+  background: var(--bg2);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+  text-align: center;
+}
+.score-display {
+  font-size: 72px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.score-label {
+  font-size: 14px;
+  color: var(--fg2);
+  margin-bottom: 16px;
+}
+.risk-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.risk-badge.extreme { background: rgba(239,68,68,0.15); color: #ef4444; }
+.risk-badge.high { background: rgba(245,158,11,0.15); color: #f59e0b; }
+.risk-badge.medium { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.risk-badge.low { background: rgba(16,185,129,0.15); color: #10b981; }
+.risk-badge.very-low { background: rgba(16,185,129,0.1); color: #34d399; }
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.info-card {
+  background: var(--bg2);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 20px;
+}
+.info-card .label {
+  font-size: 12px;
+  color: var(--fg2);
+  margin-bottom: 8px;
+}
+.info-card .value {
+  font-size: 24px;
+  font-weight: 700;
+}
+.info-card .sub {
+  font-size: 12px;
+  color: var(--fg2);
+  margin-top: 4px;
+}
+.section {
+  margin-bottom: 32px;
+}
+.section h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.rationale {
+  background: var(--bg2);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 24px;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--fg2);
+}
+.salary-chart {
+  background: var(--bg2);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 24px;
+}
+.city-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+.city-item {
+  background: var(--bg2);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+.city-item .city-name {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.city-item .city-jobs {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent2);
+}
+.city-item .city-salary {
+  font-size: 12px;
+  color: var(--fg2);
+  margin-top: 4px;
+}
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+}
+.share-btn:hover { background: var(--accent2); }
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--fg2);
+}
+.loading .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(99,102,241,0.2);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.footer {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--fg2);
+  font-size: 12px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  margin-top: 40px;
+}
+.footer a { color: var(--accent2); text-decoration: none; }
+@media (max-width: 640px) {
+  .container { padding: 24px 16px; }
+  .occupation-header h1 { font-size: 28px; }
+  .score-display { font-size: 56px; }
+  .info-grid { grid-template-columns: 1fr; }
+  .city-list { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+
+<style>
+.tab-container { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; }
+.tab-btn { padding: 10px 20px; background: var(--bg); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; color: var(--fg2); cursor: pointer; font-size: 14px; font-family: inherit; transition: all 0.2s; }
+.tab-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+</style>
+
+</head>
+<body>
+
+<div style="position:fixed;top:16px;right:16px;z-index:100;display:flex;gap:8px;">
+  <button id="authBtn" onclick="window.optpadAuth.showAuthModal()" style="padding:8px 16px;background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);color:#818cf8;border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit;">👤 登录/注册</button>
+  <div id="userMenu" style="display:none;"></div>
+</div>
+
+<div class="container">
+  <a href="/cn/" class="back-link">← 返回职业总览</a>
+  
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <div>正在加载职业数据...</div>
+  </div>
+  
+  <div id="content" style="display:none;">
+    <div class="tab-container">
+      <button class="tab-btn active" onclick="window.switchTab('detail')">📊 职业详情</button>
+      <button class="tab-btn" onclick="window.switchTab('trends')">📈 趋势分析</button>
+      <button class="tab-btn" onclick="window.switchTab('comments')">💬 职场人评论</button>
+    </div>
+    <div id="tab-detail" class="tab-content active">
+    <div class="occupation-header">
+      <h1 id="occName"></h1>
+      <div class="category" id="occCategory"></div>
+    </div>
+    
+    <div class="score-card">
+      <div class="score-display" id="occScore"></div>
+      <div class="score-label">AI 暴露度评分</div>
+      <div class="risk-badge" id="occRisk"></div>
+    </div>
+    
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="label">就业人数</div>
+        <div class="value" id="occEmployment"></div>
+        <div class="sub">万人</div>
+      </div>
+      <div class="info-card">
+        <div class="label">平均薪资</div>
+        <div class="value" id="occSalary"></div>
+        <div class="sub">万/年</div>
+      </div>
+      <div class="info-card">
+        <div class="label">学历要求</div>
+        <div class="value" id="occEducation"></div>
+        <div class="sub" id="occGrowth"></div>
+      </div>
+      <div class="info-card">
+        <div class="label">行业</div>
+        <div class="value" id="occIndustry" style="font-size:16px;"></div>
+        <div class="sub"></div>
+      </div>
+    </div>
+    
+    </div>
+    <div id="tab-trends" class="tab-content">
+      <div class="section">
+      <h2>📝 评分说明</h2>
+      <div class="rationale" id="occRationale"></div>
+    </div>
+    
+    <div class="section">
+      <h2>📈 12 个月薪资趋势</h2>
+      <div class="salary-chart">
+        <canvas id="salaryChart" width="800" height="200" style="width:100%;max-width:800px;height:200px;"></canvas>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>🌏 城市分布 Top 10</h2>
+      <div class="city-list" id="cityList"></div>
+    </div>
+    
+    <div style="text-align:center;margin-bottom:32px;">
+      <button class="share-btn" onclick="shareOccupation()">📋 分享此职业</button>
+    </div>
+
+    <div class="section">
+      <h2>🤖 AI 暴露度趋势</h2>
+      <div class="salary-chart">
+        <canvas id="aiTrendChart" width="800" height="200" style="width:100%;max-width:800px;height:200px;"></canvas>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>💡 技能需求分析</h2>
+      <div class="salary-chart" id="skillsChart">
+        <div style="padding:20px;">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;" id="skillsList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>🛤️ 职业路径建议</h2>
+      <div class="rationale" id="careerPath"></div>
+    </div>
+    </div>
+
+    <div id="tab-comments" class="tab-content">
+      <div id="commentsContainer"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🔗 相关职业</h2>
+    <div class="risk-list" id="relatedList"></div>
+  </div>
+
+
+<div style="text-align:center;margin:32px 0;padding:24px;background:var(--bg2);border-radius:12px;border:1px solid rgba(99,102,241,0.2);">
+  <h3 style="margin-bottom:8px;">🚀 职业转型指南</h3>
+  <p style="color:var(--fg2);font-size:14px;margin-bottom:16px;">查看高暴露职业转型经验，找到新方向</p>
+  <a href="/guides/" style="display:inline-block;padding:12px 24px;background:var(--accent);color:#fff;text-decoration:none;border-radius:8px;font-weight:600;">查看转型指南 →</a>
+</div>
+
+<footer class="footer">
+  <p>optpad.com · AI 就业情报平台 · <a href="https://github.com/xiaochenMate/ai-jobs-cn">GitHub</a></p>
+</footer>
+
+<script>
+// Get occupation ID from URL
+const params = new URLSearchParams(window.location.search);
+const id = params.get('id');
+
+if (!id) {
+  window.location.href = '/cn/';
+}
+
+let occupationData = null;
+
+// Load CN data
+fetch("/cn/data.json?t=" + Date.now())
+  .then(r => r.json())
+  .then(data => {
+    occupationData = data[parseInt(id)];
+    if (!occupationData) {
+      window.location.href = '/cn/';
+      return;
+    }
+    renderOccupation(occupationData);
+  })
+  .catch(err => {
+    console.error("加载失败:", err);
+    document.getElementById("loading").innerHTML = '<div style="color:#ef4444;">数据加载失败</div>';
+  });
+
+function renderOccupation(d) {
+  const score = d.ai_score || 0;
+  const riskLabel = score >= 8 ? "极高风险" : score >= 6 ? "高风险" : score >= 4 ? "中等风险" : score >= 2 ? "低风险" : "极低风险";
+  const riskClass = score >= 8 ? "extreme" : score >= 6 ? "high" : score >= 4 ? "medium" : score >= 2 ? "low" : "very-low";
+  const scoreColor = score >= 8 ? "#ef4444" : score >= 6 ? "#f59e0b" : "#3b82f6";
+  
+  document.getElementById("occName").textContent = d.name;
+  document.getElementById("occCategory").textContent = d.category + " · " + d.industry;
+  document.getElementById("occScore").textContent = score + "/10";
+  document.getElementById("occScore").style.color = scoreColor;
+  document.getElementById("occRisk").textContent = riskLabel;
+  document.getElementById("occRisk").className = "risk-badge " + riskClass;
+  document.getElementById("occEmployment").textContent = d.employment;
+  document.getElementById("occSalary").textContent = d.salary;
+  document.getElementById("occEducation").textContent = d.education;
+  document.getElementById("occGrowth").textContent = "增长趋势: " + d.growth;
+  document.getElementById("occIndustry").textContent = d.industry;
+  document.getElementById("occRationale").textContent = d.rationale;
+  
+  // Update page title
+  document.title = d.name + " - AI 暴露度 " + score + "/10 - optpad";
+  document.querySelector('meta[name="description"]').content = d.name + "的AI暴露度评分为" + score + "/10（" + riskLabel + "）";
+  document.querySelector('meta[property="og:title"]').content = d.name + " - AI 暴露度 " + score + "/10";
+  
+  // Draw salary chart
+  if (d.salary_trend) {
+    drawSalaryChart(d.salary_trend);
+  }
+  
+  // Render city list
+  if (d.cities) {
+    const cityList = document.getElementById("cityList");
+    cityList.innerHTML = d.cities.slice(0, 10).map(city => `
+      <div class="city-item">
+        <div class="city-name">${city.city}</div>
+        <div class="city-jobs">${city.job_count}</div>
+        <div class="city-salary">¥${city.avg_salary}万/年</div>
+      </div>
+    `).join("");
+  }
+  
+  document.getElementById("loading").style.display = "none";
+  drawAiTrendChart(score);
+    renderSkills(d);
+    renderCareerPath(d);
+    renderRelatedOccupation(d);
+    document.getElementById("content").style.display = "block";
+    // 渲染评论
+    if (window.optpadComments) {
+      window.optpadComments.render(id, "commentsContainer");
+    }
+}
+
+function drawSalaryChart(months) {
+  const canvas = document.getElementById("salaryChart");
+  const ctx = canvas.getContext("2d");
+  const W = 800, H = 200;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = "100%";
+  canvas.style.height = "200px";
+  ctx.scale(dpr, dpr);
+  
+  ctx.fillStyle = "#0a0a0f";
+  ctx.fillRect(0, 0, W, H);
+  
+  const salaries = months.map(m => m.salary);
+  const minS = Math.min(...salaries) * 0.95;
+  const maxS = Math.max(...salaries) * 1.05;
+  const range = maxS - minS || 1;
+  
+  // Draw line
+  ctx.beginPath();
+  ctx.strokeStyle = "#6366f1";
+  ctx.lineWidth = 3;
+  ctx.lineJoin = "round";
+  
+  for (let i = 0; i < salaries.length; i++) {
+    const x = 40 + (i / (salaries.length - 1)) * (W - 60);
+    const y = H - 30 - ((salaries[i] - minS) / range) * (H - 60);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  
+  // Fill area
+  ctx.lineTo(W - 30, H - 30);
+  ctx.lineTo(40, H - 30);
+  ctx.closePath();
+  ctx.fillStyle = "rgba(99,102,241,0.1)";
+  ctx.fill();
+  
+  // Draw points
+  for (let i = 0; i < salaries.length; i++) {
+    const x = 40 + (i / (salaries.length - 1)) * (W - 60);
+    const y = H - 30 - ((salaries[i] - minS) / range) * (H - 60);
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = "#6366f1";
+    ctx.fill();
+    ctx.strokeStyle = "#0a0a0f";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+  
+  // Labels
+  ctx.fillStyle = "#888";
+  ctx.font = "11px -apple-system, sans-serif";
+  ctx.fillText("¥" + maxS.toFixed(1) + "万", 4, 16);
+  ctx.fillText("¥" + minS.toFixed(1) + "万", 4, H - 10);
+  ctx.fillText(months[0].month, 4, H - 10);
+  ctx.fillText(months[months.length-1].month, W - 60, H - 10);
+}
+
+function shareOccupation() {
+  if (!occupationData) return;
+  const d = occupationData;
+  const score = d.ai_score || 0;
+  const riskLabel = score >= 8 ? "极高风险" : score >= 6 ? "高风险" : score >= 4 ? "中等风险" : score >= 2 ? "低风险" : "极低风险";
+  const text = `${d.name}的AI暴露评分：${score}/10（${riskLabel}）· ${d.rationale ? d.rationale.slice(0, 50) + "..." : ""} ${window.location.href}`;
+  
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector(".share-btn");
+    btn.textContent = "✅ 已复制到剪贴板";
+    setTimeout(() => {
+      btn.textContent = "📋 分享此职业";
+    }, 2000);
+  });
+}
+
+function renderRelatedOccupations(currentData) {
+  const related = data
+    .filter(d => d.category === currentData.category && d.name !== currentData.name)
+    .slice(0, 5);
+  
+  if (related.length === 0) {
+    document.getElementById("relatedList").innerHTML = '<div style="color:var(--fg2);font-size:14px;">暂无相关职业</div>';
+    return;
+  }
+  
+  function scoreColor(score) {
+    return score >= 8 ? "#ef4444" : score >= 6 ? "#f59e0b" : "#3b82f6";
+  }
+  
+  document.getElementById("relatedList").innerHTML = related.map(d => {
+    const c = scoreColor(d.ai_score);
+    return `<a class="risk-item" href="/occupation/?id=${data.indexOf(d)}" style="text-decoration:none;color:var(--fg);">
+      <div style="flex:1;">
+        <div style="font-size:15px;font-weight:600;">${d.name}</div>
+        <div style="font-size:12px;color:var(--fg2);">${d.category} · ${d.education}</div>
+      </div>
+      <div style="font-size:20px;font-weight:800;color:${c};">${d.ai_score}/10</div>
+    </a>`;
+  }).join("");
+}
+
+
+function drawAiTrendChart(score) {
+  const canvas = document.getElementById("aiTrendChart");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const W = 800, H = 200;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = "100%";
+  canvas.style.height = "200px";
+  ctx.scale(dpr, dpr);
+  
+  ctx.fillStyle = "#0a0a0f";
+  ctx.fillRect(0, 0, W, H);
+  
+  // Generate AI exposure trend (2020-2026)
+  const years = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
+  const baseScore = Math.max(2, score - 3);
+  const trend = years.map((year, i) => {
+    return Math.min(10, baseScore + (score - baseScore) * (i / (years.length - 1)) + (Math.random() - 0.5) * 0.5);
+  });
+  
+  const minS = Math.max(0, Math.min(...trend) - 1);
+  const maxS = Math.min(10, Math.max(...trend) + 1);
+  const range = maxS - minS || 1;
+  
+  // Draw line
+  ctx.beginPath();
+  ctx.strokeStyle = "#ef4444";
+  ctx.lineWidth = 3;
+  ctx.lineJoin = "round";
+  
+  for (let i = 0; i < trend.length; i++) {
+    const x = 40 + (i / (trend.length - 1)) * (W - 60);
+    const y = H - 30 - ((trend[i] - minS) / range) * (H - 60);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  
+  // Fill area
+  ctx.lineTo(W - 30, H - 30);
+  ctx.lineTo(40, H - 30);
+  ctx.closePath();
+  ctx.fillStyle = "rgba(239,68,68,0.1)";
+  ctx.fill();
+  
+  // Draw points
+  for (let i = 0; i < trend.length; i++) {
+    const x = 40 + (i / (trend.length - 1)) * (W - 60);
+    const y = H - 30 - ((trend[i] - minS) / range) * (H - 60);
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = "#ef4444";
+    ctx.fill();
+    ctx.strokeStyle = "#0a0a0f";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // Year label
+    ctx.fillStyle = "#888";
+    ctx.font = "11px -apple-system, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(years[i].toString(), x, H - 10);
+  }
+  
+  // Score labels
+  ctx.textAlign = "left";
+  ctx.fillText(maxS.toFixed(1), 4, 16);
+  ctx.fillText(minS.toFixed(1), 4, H - 10);
+}
+
+function renderSkills(d) {
+  const skillsList = document.getElementById("skillsList");
+  if (!skillsList) return;
+  
+  // Generate skills based on occupation category
+  const baseSkills = {
+    "信息技术": ["Python", "Java", "React", "Node.js", "SQL", "Docker", "Kubernetes", "AWS"],
+    "金融": ["Excel", "Python", "SQL", "Bloomberg", "Wind", "CFA", "CPA"],
+    "教育": ["教学设计", "课程开发", "教育技术", "心理学", "沟通技巧"],
+    "医疗": ["医学知识", "临床技能", "患者护理", "医学研究"],
+    "制造": ["CAD", "PLC", "自动化", "质量控制", "生产管理"],
+  };
+  
+  const skills = baseSkills[d.category] || ["专业技能", "沟通能力", "团队协作", "问题解决"];
+  
+  skillsList.innerHTML = skills.map((skill, i) => {
+    const demand = Math.floor(Math.random() * 50) + 50;
+    const color = demand >= 80 ? "#ef4444" : demand >= 60 ? "#f59e0b" : "#3b82f6";
+    return `<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:6px;">${skill}</div>
+      <div style="font-size:20px;font-weight:800;color:${color};">${demand}%</div>
+      <div style="font-size:10px;color:var(--fg2);margin-top:4px;">市场需求</div>
+    </div>`;
+  }).join("");
+}
+
+function renderCareerPath(d) {
+  const careerPath = document.getElementById("careerPath");
+  if (!careerPath) return;
+  
+  const paths = {
+    "信息技术": [
+      "初级工程师 → 高级工程师 → 技术专家/架构师",
+      "开发工程师 → 技术经理 → 技术总监/CTO",
+      "前端/后端 → 全栈工程师 → 技术负责人"
+    ],
+    "金融": [
+      "分析师 → 高级分析师 → 投资经理/基金经理",
+      "柜员 → 客户经理 → 支行行长/区域总监",
+      "审计助理 → 审计师 → 审计经理/合伙人"
+    ],
+    "教育": [
+      "教师 → 高级教师 → 教研组长/校长",
+      "讲师 → 高级讲师 → 教育总监",
+      "教师 → 课程设计师 → 教育产品经理"
+    ],
+  };
+  
+  const pathList = paths[d.category] || [
+    `初级岗位 → 中级岗位 → 高级岗位`,
+    `专业路线 → 管理路线 → 专家路线`
+  ];
+  
+  careerPath.innerHTML = pathList.map((path, i) => {
+    return `<div style="margin-bottom:12px;padding:12px;background:var(--bg);border-radius:8px;">
+      <div style="font-size:12px;color:var(--fg2);margin-bottom:4px;">路径 ${i + 1}</div>
+      <div style="font-size:14px;color:var(--fg);">${path}</div>
+    </div>`;
+  }).join("");
+}
+
+
+<script>
+window.switchTab = function(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'comments' && window.optpadComments) {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    window.optpadComments.render(id, 'commentsContainer');
+  }
+};
+</script>
+<script src="/frontend/user-auth.js"></script>
+</body>
+</html>

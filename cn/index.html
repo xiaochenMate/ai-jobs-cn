@@ -3,16 +3,73 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI 对中国就业市场的冲击</title>
+<title>AI 对中国就业市场的冲击 - 147 个职业 AI 暴露度可视化 | optpad</title>
+<meta name="description" content="可视化展示 AI 对中国 147 个职业的暴露程度，面积=就业人数，颜色=AI 影响度。数据来自国家统计局，由 Qwen-turbo 混合模型评分。">
+<meta name="keywords" content="AI,中国就业,职业暴露度,自动化,人工智能,就业数据,国家统计局">
+<meta name="robots" content="index, follow">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="AI 对中国就业市场的冲击 - optpad">
+<meta property="og:description" content="可视化展示 AI 对中国 147 个职业的暴露程度">
+<meta property="og:url" content="https://optpad.com/cn/">
+<meta property="og:image" content="https://optpad.com/preview.png">
+<meta property="og:site_name" content="optpad">
+<meta property="og:locale" content="zh_CN">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AI 对中国就业市场的冲击 - optpad">
+<meta name="twitter:description" content="AI 对中国 147 个职业的暴露程度">
+<meta name="twitter:image" content="https://optpad.com/preview.png">
+
+<!-- Canonical -->
+<link rel="canonical" href="https://optpad.com/cn/">
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "AI 对中国就业市场的冲击",
+  "url": "https://optpad.com/cn/",
+  "description": "可视化展示 AI 对中国 147 个职业的暴露程度"
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
   --bg: #0a0a0f;
   --bg2: #12121a;
+  --bg3: #1a1a2e;
   --fg: #e0e0e8;
   --fg2: #888894;
+  --accent: #6366f1;
+  --accent2: #818cf8;
   --sidebar-w: 220px;
+  --card-bg: rgba(255,255,255,0.04);
+  --card-border: rgba(255,255,255,0.06);
+  --input-bg: var(--bg2);
+  --input-border: rgba(255,255,255,0.1);
+}
+
+[data-theme="light"] {
+  --bg: #f8f9fa;
+  --bg2: #ffffff;
+  --bg3: #e9ecef;
+  --fg: #1a1a2e;
+  --fg2: #6c757d;
+  --card-bg: rgba(0,0,0,0.04);
+  --card-border: rgba(0,0,0,0.08);
+  --input-bg: #ffffff;
+  --input-border: rgba(0,0,0,0.15);
 }
 
 body {
@@ -22,6 +79,8 @@ body {
   overflow: hidden;
   height: 100vh;
 }
+
+[data-theme="light"] body { background: var(--bg); }
 
 #sidebar {
   position: fixed;
@@ -38,30 +97,21 @@ body {
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,0.08) transparent;
 }
+
+[data-theme="light"] #sidebar {
+  background: var(--bg2);
+  border-right-color: rgba(0,0,0,0.08);
+}
+
 #sidebar::-webkit-scrollbar { width: 4px; }
 #sidebar::-webkit-scrollbar-track { background: transparent; }
 #sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
 
-#sidebar h1 {
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.3;
-}
-#sidebar .subtitle {
-  font-size: 11px;
-  color: var(--fg2);
-  margin-top: 4px;
-  line-height: 1.4;
-}
+#sidebar h1 { font-size: 16px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.3; }
+#sidebar .subtitle { font-size: 11px; color: var(--fg2); margin-top: 4px; line-height: 1.4; }
 #sidebar .subtitle a { color: var(--fg2); }
 
-/* Mode toggle */
-.mode-toggle {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
+.mode-toggle { display: flex; flex-direction: column; gap: 3px; }
 .mode-toggle button {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.08);
@@ -74,10 +124,14 @@ body {
   transition: all 0.15s;
   font-family: inherit;
 }
-.mode-toggle button:hover {
-  background: rgba(255,255,255,0.08);
-  color: var(--fg);
+
+[data-theme="light"] .mode-toggle button {
+  background: var(--card-bg);
+  border-color: var(--card-border);
+  color: var(--fg2);
 }
+
+.mode-toggle button:hover { background: rgba(255,255,255,0.08); color: var(--fg); }
 .mode-toggle button.active {
   background: rgba(255,255,255,0.12);
   border-color: rgba(255,255,255,0.2);
@@ -85,28 +139,16 @@ body {
   font-weight: 600;
 }
 
-.stat-section {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+[data-theme="light"] .mode-toggle button.active {
+  background: rgba(99,102,241,0.12);
+  border-color: rgba(99,102,241,0.3);
+  color: #6366f1;
 }
-.stat-section h3 {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--fg2);
-}
-.stat-big {
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1;
-}
-.stat-label {
-  font-size: 11px;
-  color: var(--fg2);
-}
+
+.stat-section { display: flex; flex-direction: column; gap: 6px; }
+.stat-section h3 { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg2); }
+.stat-big { font-size: 28px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+.stat-label { font-size: 11px; color: var(--fg2); }
 
 .tier-bar { display: flex; flex-direction: column; gap: 4px; }
 .tier-row { display: flex; align-items: center; gap: 6px; font-size: 11px; }
@@ -137,6 +179,8 @@ canvas#canvas {
   cursor: default;
 }
 
+[data-theme="light"] canvas#canvas { background: var(--bg); }
+
 #tooltip {
   position: fixed;
   pointer-events: none;
@@ -152,6 +196,13 @@ canvas#canvas {
   z-index: 20;
   box-shadow: 0 8px 32px rgba(0,0,0,0.6);
 }
+
+[data-theme="light"] #tooltip {
+  background: var(--bg2);
+  border-color: rgba(0,0,0,0.12);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+}
+
 #tooltip.visible { opacity: 1; }
 #tooltip .tt-title { font-weight: 600; font-size: 14px; margin-bottom: 6px; color: #fff; }
 #tooltip .tt-exposure { font-size: 12px; margin-bottom: 8px; }
@@ -159,14 +210,93 @@ canvas#canvas {
 #tooltip .tt-stats .label { color: var(--fg2); }
 #tooltip .tt-stats .value { color: var(--fg); text-align: right; }
 #tooltip .tt-rationale { font-size: 11px; color: var(--fg2); margin-top: 8px; line-height: 1.4; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; }
+
+#menuToggle {
+  display: none;
+  position: fixed;
+  top: 12px; left: 12px;
+  z-index: 20;
+  background: var(--bg2);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--fg);
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+[data-theme="light"] #menuToggle { color: var(--fg); }
+
+#sidebarOverlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 9;
+}
+
+#sidebarOverlay.open { display: block; }
+
+#sidebarClose {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--fg2);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+[data-theme="light"] #sidebarClose { color: var(--fg); }
+
+@media (max-width: 768px) {
+  :root { --sidebar-w: 0px; }
+  #sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: none;
+  }
+  #sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+  }
+  canvas#canvas { left: 0 !important; }
+  #menuToggle { display: flex !important; }
+  #sidebarClose { display: block !important; }
+}
+
+#loadingOverlay {
+  position: fixed;
+  top: 0; left: 220px; right: 0; bottom: 0;
+  background: #0a0a0f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  flex-direction: column;
+  gap: 16px;
+}
+
+[data-theme="light"] #loadingOverlay { background: var(--bg); }
+
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
+<!-- Mobile menu toggle -->
+<button id="menuToggle" onclick="document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('open')">☰</button>
+<div id="sidebarOverlay" onclick="document.getElementById('sidebar').classList.remove('open');this.classList.remove('open')"></div>
+
 <div id="sidebar">
-  <div>
-    <h1>AI 对中国就业市场的冲击</h1>
-    <div class="subtitle">147 个职业 · 面积 = 就业人数 · 颜色 = AI 暴露程度<br>数据来源：<a href="https://www.stats.gov.cn/">国家统计局</a>等，由 Claude 评分<br><a href="https://github.com/karpathy/jobs">GitHub</a></div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+    <div>
+      <h1>AI 对中国就业市场的冲击</h1>
+      <div class="subtitle">147 个职业 · 面积 = 就业人数 · 颜色 = AI 暴露程度<br>数据来源：<a href="https://www.stats.gov.cn/">国家统计局</a>等，由 Qwen-turbo 混合模型评分<br><a href="https://github.com/karpathy/jobs">GitHub</a></div>
+    </div>
+    <button onclick="document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open')" id="sidebarClose">✕</button>
   </div>
 
   <div class="stat-section">
@@ -216,6 +346,26 @@ canvas#canvas {
     <div class="stat-label">暴露分数 ≥7 的职业</div>
   </div>
 
+  <div class="stat-section">
+    <h3>城市分布</h3>
+    <div id="cityHeatmapContainer" style="min-height:100px;background:var(--bg);border-radius:6px;padding:8px;">
+      <div style="text-align:center;color:var(--fg2);font-size:12px;padding:20px;">点击职业查看城市分布</div>
+    </div>
+  </div>
+
+  <div class="stat-section">
+    <h3>薪资趋势 (12 个月)</h3>
+    <div id="salaryTrendChart" style="width:100%;height:120px;border-radius:4px;"></div>
+    <div class="stat-label" id="salaryTrendLabel" style="font-size:10px;color:var(--fg2);margin-top:4px;">点击职业查看薪资趋势</div>
+  </div>
+
+  <div class="stat-section" style="margin-top:auto;padding-top:12px;border-top:1px solid var(--card-border);">
+    <button id="themeToggle" onclick="toggleTheme()" style="width:100%;padding:8px 12px;background:var(--card-bg);border:1px solid var(--card-border);color:var(--fg2);border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;display:flex;align-items:center;gap:6px;justify-content:center;">
+      <span id="themeIcon">🌙</span>
+      <span id="themeLabel">切换亮色主题</span>
+    </button>
+  </div>
+
   <div class="gradient-legend">
     <span>低</span>
     <canvas id="gradientLegend" width="80" height="8"></canvas>
@@ -233,9 +383,47 @@ canvas#canvas {
 </div>
 
 <script>
+// ── Theme System ──
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('optpad-theme', next);
+  const icon = document.getElementById('themeIcon');
+  const label = document.getElementById('themeLabel');
+  if (next === 'light') {
+    icon.textContent = '☀️';
+    label.textContent = '切换暗色主题';
+  } else {
+    icon.textContent = '🌙';
+    label.textContent = '切换亮色主题';
+  }
+}
 
-// ── 行业增加值 GDP（2023年，亿元）来源：国家统计局 ──
+(function() {
+  const saved = localStorage.getItem('optpad-theme');
+  if (saved) {
+    document.documentElement.setAttribute('data-theme', saved);
+    setTimeout(function() {
+      const icon = document.getElementById('themeIcon');
+      const label = document.getElementById('themeLabel');
+      if (saved === 'light') {
+        icon.textContent = '☀️';
+        label.textContent = '切换暗色主题';
+      }
+    }, 100);
+  }
+})();
 
+// ── Global error handler ──
+window.addEventListener('error', function(e) {
+  console.error("🌍 全局错误:", e.message, "at", e.filename, "line", e.lineno);
+});
+window.addEventListener('unhandledrejection', function(e) {
+  console.error("🌍 未处理的 Promise 拒绝:", e.reason);
+});
+
+// ── Industry GDP data ──
 const INDUSTRY_GDP = {
   "农林牧渔业": 94463,
   "采矿业": 28000,
@@ -258,12 +446,9 @@ const INDUSTRY_GDP = {
   "公共管理社会保障和社会组织": 51469,
 };
 
-// ── Mode state ──
-
-let currentMode = "employment"; // "employment" | "wages" | "gdp"
+let currentMode = "employment";
 
 // ── Color scale ──
-
 function exposureColor(score) {
   if (score == null) return [128, 128, 128];
   const t = Math.max(0, Math.min(10, score)) / 10;
@@ -284,11 +469,10 @@ function exposureColor(score) {
 
 function exposureColorCSS(score, alpha) {
   const [r, g, b] = exposureColor(score);
-  return `rgba(${r},${g},${b},${alpha})`;
+  return "rgba(" + r + "," + g + "," + b + "," + alpha + ")";
 }
 
-// ── Squarified treemap layout ──
-
+// ── Squarified treemap ──
 function squarify(items, x, y, w, h) {
   if (items.length === 0) return [];
   if (items.length === 1) return [{ ...items[0], rx: x, ry: y, rw: w, rh: h }];
@@ -338,38 +522,19 @@ function worstAspect(row, rowSum, side, totalArea, availableExtent) {
   return worst;
 }
 
-// ── getValue for each mode ──
-
-function getIndustryTotalEmp(industry) {
-  let total = 0;
-  for (const d of data) {
-    if (d.industry === industry) total += d.employment;
-  }
-  return total;
-}
-
-// Cache industry totals
-let industryEmpCache = {};
-function buildIndustryCache() {
-  industryEmpCache = {};
-  for (const d of data) {
-    industryEmpCache[d.industry] = (industryEmpCache[d.industry] || 0) + d.employment;
-  }
-}
-
+// ── getValue ──
 function getValue(d) {
   if (currentMode === "employment") return d.employment || 1;
-  if (currentMode === "wages") return (d.employment || 0) * (d.salary || 0); // 万人·万元=亿元
+  if (currentMode === "wages") return (d.employment || 0) * (d.salary || 0);
   if (currentMode === "gdp") {
     const indGDP = INDUSTRY_GDP[d.industry] || 0;
     const indEmp = industryEmpCache[d.industry] || 1;
-    return indGDP * ((d.employment || 0) / indEmp); // 亿元
+    return indGDP * ((d.employment || 0) / indEmp);
   }
   return d.employment || 1;
 }
 
 // ── Rendering ──
-
 let data = [];
 let rects = [];
 let hovered = null;
@@ -379,6 +544,14 @@ const ctx = canvas.getContext("2d");
 let dpr = window.devicePixelRatio || 1;
 const MARGIN = 12;
 const GAP = 1.5;
+
+let industryEmpCache = {};
+function buildIndustryCache() {
+  industryEmpCache = {};
+  for (const d of data) {
+    industryEmpCache[d.industry] = (industryEmpCache[d.industry] || 0) + d.employment;
+  }
+}
 
 function layout() {
   const sidebarW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-w'));
@@ -415,7 +588,7 @@ function layout() {
 
 function draw() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.fillStyle = "#0a0a0f";
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || "#0a0a0f";
   ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
 
   for (const r of rects) {
@@ -433,7 +606,7 @@ function draw() {
       ctx.save();
       ctx.beginPath(); ctx.rect(rx + 4, ry + 2, rw - 8, rh - 4); ctx.clip();
       const fontSize = Math.min(13, Math.max(9, Math.min(rw / 10, rh / 3)));
-      ctx.font = `500 ${fontSize}px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif`;
+      ctx.font = "500 " + fontSize + 'px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
       ctx.fillStyle = isH ? "#fff" : "rgba(255,255,255,0.85)";
       ctx.textBaseline = "top";
       ctx.fillText(r.name, rx + 5, ry + 4);
@@ -441,9 +614,9 @@ function draw() {
       if (rh > 34 && rw > 60) {
         let info = r.ai_score + "/10";
         const v = getValue(r);
-        if (currentMode === "employment") info += " \u00b7 " + formatWan(r.employment);
-        else info += " \u00b7 " + formatYi(v);
-        ctx.font = `400 ${Math.max(8, fontSize - 2)}px -apple-system, "PingFang SC", sans-serif`;
+        if (currentMode === "employment") info += " · " + formatWan(r.employment);
+        else info += " · " + formatYi(v);
+        ctx.font = "400 " + Math.max(8, fontSize - 2) + 'px -apple-system, "PingFang SC", sans-serif';
         ctx.fillStyle = "rgba(255,255,255,0.5)";
         ctx.fillText(info, rx + 5, ry + 4 + fontSize + 2);
       }
@@ -486,21 +659,20 @@ function showTooltip(d, mx, my) {
   const score = d.ai_score;
   const color = exposureColorCSS(score, 1);
   tt.querySelector(".tt-exposure").innerHTML =
-    `<span style="color:${color};font-weight:600;">AI \u66b4\u9732\u8bc4\u5206\uff1a${score}/10</span>` +
-    `<div style="margin-top:3px;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;">` +
-    `<div style="height:100%;width:${score * 10}%;background:${color};border-radius:2px;"></div></div>`;
+    '<span style="color:' + color + ';font-weight:600;">AI 暴露评分：' + score + '/10</span>' +
+    '<div style="margin-top:3px;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;">' +
+    '<div style="height:100%;width:' + (score * 10) + '%;background:' + color + ';border-radius:2px;"></div></div>';
 
-  const wageTotal = (d.employment || 0) * (d.salary || 0); // 亿元
+  const wageTotal = (d.employment || 0) * (d.salary || 0);
   const gdpShare = getValue(d);
 
-  tt.querySelector(".tt-stats").innerHTML = `
-    <span class="label">\u5c31\u4e1a\u4eba\u6570</span><span class="value">${formatWan(d.employment)}</span>
-    <span class="label">\u5e74\u85aa</span><span class="value">${d.salary}\u4e07\u5143</span>
-    <span class="label">\u85aa\u8d44\u603b\u989d</span><span class="value">${formatYi(wageTotal)}\u5143</span>
-    <span class="label">\u884c\u4e1a\u4ea7\u503c\u8d21\u732e</span><span class="value">${currentMode === "gdp" ? formatYi(gdpShare) + "\u5143" : "\u2014"}</span>
-    <span class="label">\u5c31\u4e1a\u524d\u666f</span><span class="value">${d.growth}</span>
-    <span class="label">\u5b66\u5386\u8981\u6c42</span><span class="value">${d.education}</span>
-  `;
+  tt.querySelector(".tt-stats").innerHTML =
+    '<span class="label">就业人数</span><span class="value">' + formatWan(d.employment) + '</span>' +
+    '<span class="label">年薪</span><span class="value">' + d.salary + '万元</span>' +
+    '<span class="label">薪资总额</span><span class="value">' + formatYi(wageTotal) + '元</span>' +
+    '<span class="label">行业产值贡献</span><span class="value">' + (currentMode === "gdp" ? formatYi(gdpShare) + "元" : "\u2014") + '</span>' +
+    '<span class="label">就业前景</span><span class="value">' + d.growth + '</span>' +
+    '<span class="label">学历要求</span><span class="value">' + d.education + '</span>';
 
   tt.querySelector(".tt-rationale").textContent = d.rationale || "";
 
@@ -518,25 +690,59 @@ function hideTooltip() {
   document.getElementById("tooltip").classList.remove("visible");
 }
 
-// ── Sidebar stats ──
+function showDetailModal(d) {
+  const score = d.ai_score || 0;
+  const riskLabel = score >= 8 ? "极高风险" : score >= 6 ? "高风险" : score >= 4 ? "中等风险" : score >= 2 ? "低风险" : "极低风险";
+  const idx = data.indexOf(d);
 
+  const modal = document.createElement("div");
+  modal.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;";
+  modal.innerHTML =
+    '<div style="background:#1a1a2e;border-radius:12px;padding:30px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;color:#e0e0e8;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid #333;">' +
+        '<h2 style="margin:0;font-size:1.5rem;">' + d.name + '</h2>' +
+        '<div style="display:flex;gap:8px;align-items:center;">' +
+          '<a href="/occupation/?id=' + idx + '" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:#818cf8;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-block;">📄 详情</a>' +
+          '<button class="modal-close" style="background:none;border:none;color:#e0e0e8;font-size:1.5rem;cursor:pointer;">✕</button>' +
+        '</div>' +
+      '</div>' +
+      '<div style="margin-bottom:20px;">' +
+        '<h3 style="color:#4f46e5;margin-bottom:10px;">基本信息</h3>' +
+        '<p><strong>行业：</strong>' + (d.category || "") + '</p>' +
+        '<p><strong>行业大类：</strong>' + (d.industry || "") + '</p>' +
+        '<p><strong>就业人数：</strong>' + (d.employment || "0") + '万人</p>' +
+        '<p><strong>平均薪资：</strong>' + (d.salary || "0") + '万/年</p>' +
+        '<p><strong>学历要求：</strong>' + (d.education || "") + '</p>' +
+        '<p><strong>增长趋势：</strong>' + (d.growth || "") + '</p>' +
+      '</div>' +
+      '<div style="margin-bottom:20px;">' +
+        '<h3 style="color:#4f46e5;margin-bottom:10px;">AI 暴露度评分</h3>' +
+        '<div style="font-size:2rem;font-weight:700;margin:10px 0;color:' + (score >= 8 ? '#ef4444' : score >= 6 ? '#f59e0b' : '#3b82f6') + '">' + score + '/10 <span style="font-size:14px;font-weight:400;color:#888;">' + riskLabel + '</span></div>' +
+        '<p><strong>评分说明：</strong>' + (d.rationale || "") + '</p>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(modal);
+  modal.addEventListener("click", function(e) {
+    if (e.target === modal || e.target.classList.contains("modal-close")) modal.remove();
+  });
+}
+
+// ── Sidebar stats ──
 function computeStats() {
   const MODE_LABELS = {
-    employment: { total: "\u603b\u5c31\u4e1a\u4eba\u6570", hist: "\u5c31\u4e1a\u4eba\u6570\u6309\u66b4\u9732\u5206\u6570\u5206\u5e03" },
-    wages: { total: "\u85aa\u8d44\u603b\u989d", hist: "\u85aa\u8d44\u603b\u989d\u6309\u66b4\u9732\u5206\u6570\u5206\u5e03" },
-    gdp: { total: "GDP \u603b\u8d21\u732e", hist: "GDP \u8d21\u732e\u6309\u66b4\u9732\u5206\u6570\u5206\u5e03" },
+    employment: { total: "总就业人数", hist: "就业人数按暴露分数分布" },
+    wages: { total: "薪资总额", hist: "薪资总额按暴露分数分布" },
+    gdp: { total: "GDP 总贡献", hist: "GDP 贡献按暴露分数分布" },
   };
 
   document.getElementById("statTotalLabel").textContent = MODE_LABELS[currentMode].total;
   document.getElementById("histLabel").textContent = MODE_LABELS[currentMode].hist;
 
-  // Update subtitle
-  const areaLabel = currentMode === "employment" ? "\u5c31\u4e1a\u4eba\u6570" :
-                    currentMode === "wages" ? "\u85aa\u8d44\u603b\u989d" : "\u884c\u4e1a\u4ea7\u503c";
+  const areaLabel = currentMode === "employment" ? "就业人数" :
+                    currentMode === "wages" ? "薪资总额" : "行业产值";
   document.querySelector(".subtitle").innerHTML =
-    `147 \u4e2a\u804c\u4e1a \u00b7 \u9762\u79ef = ${areaLabel} \u00b7 \u989c\u8272 = AI \u66b4\u9732\u7a0b\u5ea6<br>\u6570\u636e\u6765\u6e90\uff1a<a href="https://www.stats.gov.cn/">\u56fd\u5bb6\u7edf\u8ba1\u5c40</a>\u7b49\uff0c\u7531 Claude \u8bc4\u5206<br><a href="https://github.com/karpathy/jobs">GitHub</a>`;
+    '147 个职业 · 面积 = ' + areaLabel + ' · 颜色 = AI 暴露程度<br>数据来源：<a href="https://www.stats.gov.cn/">国家统计局</a>等，由 Qwen-turbo 混合模型评分<br><a href="https://github.com/karpathy/jobs">GitHub</a>';
 
-  // Total
   let totalValue = 0;
   for (const d of data) totalValue += getValue(d);
 
@@ -546,7 +752,6 @@ function computeStats() {
     document.getElementById("statTotalJobs").textContent = formatWanYi(totalValue);
   }
 
-  // Weighted avg exposure
   let wSum = 0, wCount = 0;
   for (const d of data) {
     const v = getValue(d);
@@ -554,27 +759,25 @@ function computeStats() {
   }
   const wAvg = wCount > 0 ? wSum / wCount : 0;
   document.getElementById("statAvgExposure").innerHTML =
-    `<span style="color:${exposureColorCSS(wAvg, 1)}">${wAvg.toFixed(1)}</span>`;
+    '<span style="color:' + exposureColorCSS(wAvg, 1) + '">' + wAvg.toFixed(1) + '</span>';
 
-  // Histogram
   const histogram = new Array(11).fill(0);
   for (const d of data) {
     if (d.ai_score != null) histogram[d.ai_score] += getValue(d);
   }
   const maxHist = Math.max(...histogram);
-  document.getElementById("histogram").innerHTML = histogram.map((count, i) => {
+  document.getElementById("histogram").innerHTML = histogram.map(function(count, i) {
     const h = maxHist > 0 ? (count / maxHist * 100) : 0;
     const label = currentMode === "employment" ? formatWan(count) : formatYi(count);
-    return `<div class="bar" style="height:${Math.max(2, h)}%;background:${exposureColorCSS(i, 0.7)}" title="${i}: ${label}"></div>`;
+    return '<div class="bar" style="height:' + Math.max(2, h) + '%;background:' + exposureColorCSS(i, 0.7) + '" title="' + i + ': ' + label + '"></div>';
   }).join("");
 
-  // Tiers
   const tiers = [
-    { name: "\u6781\u4f4e (0-1)", range: [0, 1], color: exposureColorCSS(0.5, 1) },
-    { name: "\u4f4e (2-3)", range: [2, 3], color: exposureColorCSS(2.5, 1) },
-    { name: "\u4e2d\u7b49 (4-5)", range: [4, 5], color: exposureColorCSS(4.5, 1) },
-    { name: "\u9ad8 (6-7)", range: [6, 7], color: exposureColorCSS(6.5, 1) },
-    { name: "\u6781\u9ad8 (8-10)", range: [8, 10], color: exposureColorCSS(9, 1) },
+    { name: "极低 (0-1)", range: [0, 1], color: exposureColorCSS(0.5, 1) },
+    { name: "低 (2-3)", range: [2, 3], color: exposureColorCSS(2.5, 1) },
+    { name: "中等 (4-5)", range: [4, 5], color: exposureColorCSS(4.5, 1) },
+    { name: "高 (6-7)", range: [6, 7], color: exposureColorCSS(6.5, 1) },
+    { name: "极高 (8-10)", range: [8, 10], color: exposureColorCSS(9, 1) },
   ];
   for (const tier of tiers) {
     tier.total = 0;
@@ -583,25 +786,24 @@ function computeStats() {
     }
     tier.pct = totalValue > 0 ? tier.total / totalValue * 100 : 0;
   }
-  document.getElementById("tierBar").innerHTML = tiers.map(t => {
+  document.getElementById("tierBar").innerHTML = tiers.map(function(t) {
     const label = currentMode === "employment" ? formatWan(t.total) : formatYi(t.total);
-    return `<div class="tier-row">
-      <div class="tier-color" style="background:${t.color}"></div>
-      <span class="tier-name">${t.name}</span>
-      <span class="tier-jobs">${label}</span>
-      <span class="tier-pct">${t.pct.toFixed(0)}%</span>
-    </div>`;
+    return '<div class="tier-row">' +
+      '<div class="tier-color" style="background:' + t.color + '"></div>' +
+      '<span class="tier-name">' + t.name + '</span>' +
+      '<span class="tier-jobs">' + label + '</span>' +
+      '<span class="tier-pct">' + t.pct.toFixed(0) + '%</span>' +
+    '</div>';
   }).join("");
 
-  // Pay chart
   const payBands = [
-    { label: "<5\u4e07", min: 0, max: 5 },
-    { label: "5\u201310\u4e07", min: 5, max: 10 },
-    { label: "10\u201315\u4e07", min: 10, max: 15 },
-    { label: "15\u201325\u4e07", min: 15, max: 25 },
-    { label: ">25\u4e07", min: 25, max: Infinity },
+    { label: "<5万", min: 0, max: 5 },
+    { label: "5–10万", min: 5, max: 10 },
+    { label: "10–15万", min: 10, max: 15 },
+    { label: "15–25万", min: 15, max: 25 },
+    { label: ">25万", min: 25, max: Infinity },
   ];
-  document.getElementById("payChart").innerHTML = payBands.map(band => {
+  document.getElementById("payChart").innerHTML = payBands.map(function(band) {
     let ws = 0, wc = 0;
     for (const d of data) {
       if (d.salary >= band.min && d.salary < band.max) {
@@ -610,23 +812,22 @@ function computeStats() {
       }
     }
     const avg = wc > 0 ? ws / wc : 0;
-    return `<div class="hbar-row">
-      <span class="hbar-label">${band.label}</span>
-      <div class="hbar-track"><div class="hbar-fill" style="width:${avg/10*100}%;background:${exposureColorCSS(avg, 0.8)}"></div></div>
-      <span class="hbar-val">${avg.toFixed(1)}</span>
-    </div>`;
+    return '<div class="hbar-row">' +
+      '<span class="hbar-label">' + band.label + '</span>' +
+      '<div class="hbar-track"><div class="hbar-fill" style="width:' + (avg/10*100) + '%;background:' + exposureColorCSS(avg, 0.8) + '"></div></div>' +
+      '<span class="hbar-val">' + avg.toFixed(1) + '</span>' +
+    '</div>';
   }).join("");
 
-  // Education chart
   const eduGroups = [
-    { label: "\u521d\u4e2d\u53ca\u4ee5\u4e0b", match: ["\u521d\u4e2d\u53ca\u4ee5\u4e0b"] },
-    { label: "\u9ad8\u4e2d/\u4e2d\u4e13", match: ["\u9ad8\u4e2d\u4e2d\u4e13"] },
-    { label: "\u5927\u4e13", match: ["\u5927\u4e13"] },
-    { label: "\u672c\u79d1", match: ["\u672c\u79d1"] },
-    { label: "\u7855\u58eb", match: ["\u7855\u58eb"] },
-    { label: "\u535a\u58eb", match: ["\u535a\u58eb"] },
+    { label: "初中及以下", match: ["初中及以下"] },
+    { label: "高中/中专", match: ["高中中专"] },
+    { label: "大专", match: ["大专"] },
+    { label: "本科", match: ["本科"] },
+    { label: "硕士", match: ["硕士"] },
+    { label: "博士", match: ["博士"] },
   ];
-  document.getElementById("eduChart").innerHTML = eduGroups.map(grp => {
+  document.getElementById("eduChart").innerHTML = eduGroups.map(function(grp) {
     let ws = 0, wc = 0;
     for (const d of data) {
       if (grp.match.includes(d.education)) {
@@ -636,14 +837,13 @@ function computeStats() {
     }
     if (wc === 0) return "";
     const avg = ws / wc;
-    return `<div class="hbar-row">
-      <span class="hbar-label">${grp.label}</span>
-      <div class="hbar-track"><div class="hbar-fill" style="width:${avg/10*100}%;background:${exposureColorCSS(avg, 0.8)}"></div></div>
-      <span class="hbar-val">${avg.toFixed(1)}</span>
-    </div>`;
+    return '<div class="hbar-row">' +
+      '<span class="hbar-label">' + grp.label + '</span>' +
+      '<div class="hbar-track"><div class="hbar-fill" style="width:' + (avg/10*100) + '%;background:' + exposureColorCSS(avg, 0.8) + '"></div></div>' +
+      '<span class="hbar-val">' + avg.toFixed(1) + '</span>' +
+    '</div>';
   }).join("");
 
-  // High-exposure total
   let highTotal = 0;
   for (const d of data) {
     if (d.ai_score >= 7) highTotal += getValue(d);
@@ -655,24 +855,92 @@ function computeStats() {
   }
 }
 
-// ── Events ──
+// ── Salary trend chart ──
+function drawSalaryTrend(months, occupationName) {
+  const chartDom = document.getElementById("salaryTrendChart");
+  if (!chartDom || !months || months.length === 0) return;
 
-canvas.addEventListener("mousemove", (e) => {
+  let myChart = echarts.getInstanceByDom(chartDom);
+  if (!myChart) myChart = echarts.init(chartDom);
+
+  const months_list = months.map(function(m) { return m.month.slice(2); });
+  const salaries = months.map(function(m) { return m.salary; });
+  const first = salaries[0];
+  const last = salaries[salaries.length - 1];
+  const change = ((last - first) / first * 100).toFixed(1);
+  const arrow = change >= 0 ? "↑" : "↓";
+
+  const label = document.getElementById("salaryTrendLabel");
+  if (label && occupationName) {
+    label.textContent = occupationName + " · 12 个月 " + arrow + Math.abs(change) + "%";
+  }
+
+  myChart.setOption({
+    backgroundColor: "transparent",
+    grid: { left: 40, right: 20, top: 20, bottom: 30 },
+    xAxis: { type: "category", data: months_list, axisLine: { lineStyle: { color: "#888" } }, axisLabel: { color: "#888", fontSize: 10 } },
+    yAxis: { type: "value", axisLine: { lineStyle: { color: "#888" } }, axisLabel: { color: "#888", fontSize: 10, formatter: "{value}万" }, splitLine: { lineStyle: { color: "rgba(255,255,255,0.06)" } } },
+    series: [{ data: salaries, type: "line", smooth: true, symbol: "circle", symbolSize: 6, lineStyle: { color: "#6366f1", width: 2 }, itemStyle: { color: "#6366f1" }, areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: "rgba(99,102,241,0.3)" }, { offset: 1, color: "rgba(99,102,241,0.05)" }]) } }],
+    tooltip: { trigger: "axis", backgroundColor: "#1a1a2e", borderColor: "rgba(255,255,255,0.12)", textStyle: { color: "#e0e0e8", fontSize: 12 }, formatter: function(params) { return '<b>' + params[0].name + '</b><br/>薪资: ' + params[0].value + ' 万/年'; } }
+  });
+}
+
+// ── City heatmap ──
+function drawCityHeatmap(cities, occupationName) {
+  const container = document.getElementById("cityHeatmapContainer");
+  if (!container || !cities || cities.length === 0) return;
+
+  const topCities = cities.slice(0, 10);
+  const maxJobs = Math.max.apply(null, topCities.map(function(c) { return c.job_count; }));
+
+  const heatmapHTML = topCities.map(function(city) {
+    const width = (city.job_count / maxJobs * 100).toFixed(0);
+    const color = city.weight >= 1.5 ? '#ef4444' : city.weight >= 1.0 ? '#f59e0b' : '#3b82f6';
+    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;cursor:pointer;">' +
+      '<span style="width:50px;font-size:12px;color:var(--fg2);text-align:right;">' + city.city + '</span>' +
+      '<div style="flex:1;height:16px;background:rgba(255,255,255,0.04);border-radius:3px;overflow:hidden;">' +
+        '<div style="width:' + width + '%;height:100%;background:' + color + ';border-radius:3px;"></div>' +
+      '</div>' +
+      '<span style="width:40px;font-size:11px;color:var(--fg);text-align:right;">' + city.job_count + '</span>' +
+      '<span style="width:50px;font-size:10px;color:var(--fg2);">' + city.avg_salary + '万</span>' +
+    '</div>';
+  }).join('');
+
+  container.innerHTML =
+    '<div style="padding:12px;">' +
+      '<div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--fg);">' + occupationName + ' · 城市分布</div>' +
+      heatmapHTML +
+      '<div style="margin-top:12px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);font-size:10px;color:var(--fg2);">红色=一线 · 橙色=新一线 · 蓝色=二线</div>' +
+    '</div>';
+}
+
+// ── Events ──
+canvas.addEventListener("mousemove", function(e) {
   const hit = hitTest(e.clientX, e.clientY);
   if (hit !== hovered) { hovered = hit; draw(); }
   if (hovered) { showTooltip(hovered, e.clientX, e.clientY); canvas.style.cursor = "pointer"; }
   else { hideTooltip(); canvas.style.cursor = "default"; }
 });
-canvas.addEventListener("mouseleave", () => { hovered = null; hideTooltip(); draw(); });
+canvas.addEventListener("mouseleave", function() { hovered = null; hideTooltip(); draw(); });
+
+canvas.addEventListener("click", function(e) {
+  const hit = hitTest(e.clientX, e.clientY);
+  if (hit) {
+    showDetailModal(hit);
+    if (hit.salary_trend) drawSalaryTrend(hit.salary_trend, hit.name);
+    if (hit.cities) drawCityHeatmap(hit.cities, hit.name);
+  }
+});
 
 function resize() { dpr = window.devicePixelRatio || 1; layout(); draw(); }
+window.addEventListener("resize", resize);
 
 // Mode toggle
-document.getElementById("modeToggle").addEventListener("click", (e) => {
+document.getElementById("modeToggle").addEventListener("click", function(e) {
   const btn = e.target.closest("button");
   if (!btn) return;
   currentMode = btn.dataset.mode;
-  document.querySelectorAll("#modeToggle button").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll("#modeToggle button").forEach(function(b) { b.classList.remove("active"); });
   btn.classList.add("active");
   computeStats();
   layout();
@@ -690,18 +958,32 @@ function drawGradientLegend() {
 }
 
 // ── Load ──
+const loadingEl = document.createElement("div");
+loadingEl.id = "loadingOverlay";
+loadingEl.innerHTML = '<div style="width:40px;height:40px;border:3px solid rgba(99,102,241,0.2);border-top-color:#6366f1;border-radius:50%;animation:spin 0.8s linear infinite;"></div><div style="color:#888;font-size:14px;">正在加载职业数据...</div>';
+document.body.appendChild(loadingEl);
 
-fetch("data.json")
-  .then(r => r.json())
-  .then(d => {
+fetch("data.json?t=" + Date.now())
+  .then(function(r) {
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return r.json();
+  })
+  .then(function(d) {
     data = d;
     buildIndustryCache();
     computeStats();
     drawGradientLegend();
     resize();
+    loadingEl.style.transition = "opacity 0.3s";
+    loadingEl.style.opacity = "0";
+    setTimeout(function() { loadingEl.remove(); }, 300);
+  })
+  .catch(function(err) {
+    console.error("❌ 加载数据失败:", err);
+    loadingEl.innerHTML = '<div style="color:#ef4444;font-size:14px;">数据加载失败：' + err.message + '<br><button onclick="location.reload()" style="margin-top:12px;padding:8px 16px;background:#6366f1;border:none;color:#fff;border-radius:6px;cursor:pointer;">重试</button></div>';
+    document.getElementById("statTotalJobs").textContent = "加载失败";
   });
-
-window.addEventListener("resize", resize);
 </script>
+
 </body>
 </html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>optpad - AI Employment Intelligence Platform</title>
+<meta name="description" content="optpad analyzes AI exposure across 147 Chinese and 342 US occupations.">
+<meta property="og:title" content="optpad - AI Employment Intelligence">
+<meta property="og:description" content="AI exposure analysis for 147 Chinese and 342 US occupations">
+<meta property="og:url" content="https://optpad.com/en/">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --bg: #0a0a0f; --bg2: #12121a; --bg3: #1a1a2e; --fg: #e0e0e8; --fg2: #888894; --accent: #6366f1; }
+body { background: var(--bg); color: var(--fg); font-family: -apple-system, "Segoe UI", system-ui, sans-serif; min-height: 100vh; }
+.hero { text-align: center; padding: 80px 20px 40px; max-width: 800px; margin: 0 auto; }
+.hero h1 { font-size: 42px; font-weight: 800; margin-bottom: 16px; background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero .subtitle { color: var(--fg2); font-size: 16px; line-height: 1.6; margin-bottom: 48px; }
+.hero .subtitle strong { color: var(--fg); }
+.cards { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; max-width: 700px; margin: 0 auto 60px; padding: 0 20px; }
+.card { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 260px; max-width: 320px; padding: 36px 24px; background: var(--bg2); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; text-decoration: none; color: var(--fg); transition: all 0.25s; }
+.card:hover { border-color: rgba(99,102,241,0.4); transform: translateY(-6px); }
+.card .flag { font-size: 56px; margin-bottom: 16px; }
+.card .label { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.card .sub { font-size: 13px; color: var(--fg2); }
+.top-risks { max-width: 800px; margin: 0 auto 60px; padding: 0 20px; }
+.top-risks h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.top-risks .desc { color: var(--fg2); font-size: 13px; margin-bottom: 20px; }
+.risk-list { display: flex; flex-direction: column; gap: 8px; }
+.risk-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: var(--bg2); border: 1px solid rgba(255,255,255,0.04); border-radius: 10px; text-decoration: none; color: var(--fg); }
+.risk-item:hover { background: var(--bg3); }
+.risk-rank { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+.risk-rank.r1 { background: rgba(239,68,68,0.15); color: #ef4444; }
+.risk-rank.r2 { background: rgba(245,158,11,0.15); color: #f59e0b; }
+.risk-rank.r3 { background: rgba(245,158,11,0.1); color: #fbbf24; }
+.risk-rank.r4 { background: rgba(255,255,255,0.06); color: var(--fg2); }
+.risk-info { flex: 1; }
+.risk-name { font-size: 15px; font-weight: 600; }
+.risk-cat { font-size: 12px; color: var(--fg2); }
+.risk-score { font-size: 22px; font-weight: 800; min-width: 50px; text-align: right; }
+.risk-bar { width: 80px; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+.risk-bar-fill { height: 100%; border-radius: 3px; }
+.footer { text-align: center; padding: 40px 20px; color: var(--fg2); font-size: 12px; border-top: 1px solid rgba(255,255,255,0.04); }
+.footer a { color: var(--accent); text-decoration: none; }
+.skeleton { background: linear-gradient(90deg, var(--bg2) 25%, var(--bg3) 50%, var(--bg2) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+@media (max-width: 640px) { .hero h1 { font-size: 28px; } .card { min-width: 100%; } }
+</style>
+</head>
+<body>
+<section class="hero">
+  <h1>How Will AI Impact Your Job?</h1>
+  <p class="subtitle">optpad analyzes <strong>147 Chinese</strong> and <strong>342 US occupations</strong> for AI exposure<br>Scored by employment, salary, education, and AI technology impact</p>
+</section>
+<section class="cards">
+  <a class="card" href="/cn/">
+    <div class="flag">&#127464;&#127475;</div>
+    <div class="label">China Employment</div>
+    <div class="sub">147 occupations · AI exposure visualization</div>
+  </a>
+  <a class="card" href="/us/">
+    <div class="flag">&#127482;&#127480;</div>
+    <div class="label">US Employment</div>
+    <div class="sub">342 occupations · salary trend analysis</div>
+  </a>
+</section>
+<section class="top-risks">
+  <h2>🔥 Top 10 Most AI-Exposed Occupations in China</h2>
+  <p class="desc">Higher score = higher AI replacement risk · Data: Qwen-turbo hybrid model</p>
+  <div class="risk-list" id="riskList">
+    <div class="skeleton" style="height:52px"></div>
+    <div class="skeleton" style="height:52px"></div>
+    <div class="skeleton" style="height:52px"></div>
+  </div>
+</section>
+<footer class="footer">
+  <p>optpad.com · AI Employment Intelligence · <a href="https://github.com/xiaochenMate/ai-jobs-cn">GitHub</a></p>
+</footer>
+<script>
+fetch("/cn/data.json?t=" + Date.now())
+  .then(r => r.json())
+  .then(data => {
+    const top10 = data.filter(d => d.ai_score != null).sort((a, b) => b.ai_score - a.ai_score).slice(0, 10);
+    function scoreColor(score) { return score >= 8 ? "#ef4444" : score >= 6 ? "#f59e0b" : "#3b82f6"; }
+    document.getElementById("riskList").innerHTML = top10.map((d, i) => {
+      const rc = i < 1 ? "r1" : i < 2 ? "r2" : i < 3 ? "r3" : "r4";
+      const c = scoreColor(d.ai_score);
+      return `<a class="risk-item" href="/cn/"><div class="risk-rank ${rc}">${i+1}</div><div class="risk-info"><div class="risk-name">${d.name}</div><div class="risk-cat">${d.category} · ${d.employment}w workers · ¥${d.salary}k/yr</div></div><div class="risk-bar"><div class="risk-bar-fill" style="width:${d.ai_score*10}%;background:${c}"></div></div><div class="risk-score" style="color:${c}">${d.ai_score}</div></a>`;
+    }).join("");
+  });
+</script>
+</body>
+</html>

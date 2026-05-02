@@ -1,241 +1,53 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 对美国就业市场的影响</title>
-    <style>
-        *, *::before, *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        :root {
-            --bg: #0a0a0f;
-            --bg2: #12121a;
-            --fg: #e0e0e8;
-            --fg2: #888894;
-            --sidebar-w: 240px;
-        }
-        body {
-            background: var(--bg);
-            color: var(--fg);
-            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
-            overflow: hidden;
-            height: 100vh;
-        }
-        #sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            width: var(--sidebar-w);
-            background: var(--bg2);
-            border-right: 1px solid rgba(255,255,255,0.06);
-            padding: 20px 18px;
-            z-index: 10;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        #sidebar h1 {
-            font-size: 16px;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-            line-height: 1.3;
-        }
-        #sidebar .subtitle {
-            font-size: 11px;
-            color: var(--fg2);
-            margin-top: 4px;
-            line-height: 1.4;
-        }
-        #sidebar .subtitle a {
-            color: var(--fg2);
-        }
-        .stat-section {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .stat-section h3 {
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--fg2);
-        }
-        .stat-big {
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            line-height: 1;
-        }
-        .stat-label {
-            font-size: 11px;
-            color: var(--fg2);
-        }
-        .tier-bar {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .tier-row {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11px;
-        }
-        .tier-color {
-            width: 10px;
-            height: 10px;
-            border-radius: 2px;
-            flex-shrink: 0;
-        }
-        .tier-name {
-            flex: 1;
-            color: var(--fg2);
-        }
-        .tier-jobs {
-            text-align: right;
-            white-space: nowrap;
-        }
-        .tier-pct {
-            text-align: right;
-            width: 32px;
-            color: var(--fg2);
-            font-size: 10px;
-        }
-        .histogram {
-            display: flex;
-            align-items: flex-end;
-            gap: 2px;
-            height: 48px;
-        }
-        .histogram .bar {
-            flex: 1;
-            border-radius: 1px 1px 0 0;
-            min-height: 1px;
-            position: relative;
-        }
-        .hist-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 9px;
-            color: var(--fg2);
-            margin-top: 2px;
-        }
-        .hbar-chart {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .hbar-row {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11px;
-        }
-        .hbar-label {
-            width: 80px;
-            flex-shrink: 0;
-            color: var(--fg2);
-            font-size: 10px;
-            text-align: right;
-        }
-        .hbar-track {
-            flex: 1;
-            height: 10px;
-            background: rgba(255,255,255,0.04);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-        .hbar-fill {
-            height: 100%;
-            border-radius: 2px;
-        }
-        .hbar-val {
-            width: 22px;
-            flex-shrink: 0;
-            font-size: 10px;
-            color: var(--fg);
-            text-align: right;
-        }
-        .gradient-legend {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 10px;
-            color: var(--fg2);
-        }
-        .gradient-legend canvas {
-            border-radius: 2px;
-        }
-        canvas#canvas {
-            display: block;
-            position: fixed;
-            top: 0;
-            left: var(--sidebar-w);
-            cursor: default;
-        }
-        #tooltip {
-            position: fixed;
-            pointer-events: none;
-            background: var(--bg2);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 8px;
-            padding: 12px 16px;
-            font-size: 13px;
-            line-height: 1.5;
-            max-width: 380px;
-            opacity: 0;
-            transition: opacity 0.12s;
-            z-index: 20;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-        }
-        #tooltip.visible {
-            opacity: 1;
-        }
-        #tooltip .tt-title {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 2px;
-            color: #fff;
-        }
-        #tooltip .tt-title-en {
-            font-size: 11px;
-            color: var(--fg2);
-            margin-bottom: 6px;
-        }
-        #tooltip .tt-exposure {
-            font-size: 12px;
-            margin-bottom: 8px;
-        }
-        #tooltip .tt-stats {
-            display: grid;
-            grid-template-columns: auto auto;
-            gap: 2px 12px;
-            font-size: 12px;
-        }
-        #tooltip .tt-stats .label {
-            color: var(--fg2);
-        }
-        #tooltip .tt-stats .value {
-            color: var(--fg);
-            text-align: right;
-        }
-        #tooltip .tt-rationale {
-            font-size: 11px;
-            color: var(--fg2);
-            margin-top: 8px;
-            line-height: 1.4;
-            border-top: 1px solid rgba(255,255,255,0.06);
-            padding-top: 8px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Impact on US Employment - 342 Occupations Exposure Analysis | optpad</title>
+<meta name="description" content="Interactive visualization of AI exposure across 342 US occupations. Data-driven analysis of automation risk by industry, salary, and education level.">
+<meta name="keywords" content="AI,employment,automation,US jobs,artificial intelligence,exposure,salary trends">
+<meta name="robots" content="index, follow">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="AI Impact on US Employment - optpad">
+<meta property="og:description" content="Interactive visualization of AI exposure across 342 US occupations">
+<meta property="og:url" content="https://optpad.com/us/">
+<meta property="og:image" content="https://optpad.com/preview.png">
+<meta property="og:site_name" content="optpad">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AI Impact on US Employment - optpad">
+<meta name="twitter:description" content="Interactive visualization of AI exposure across 342 US occupations">
+<meta name="twitter:image" content="https://optpad.com/preview.png">
+
+<!-- Canonical URL -->
+<link rel="canonical" href="https://optpad.com/us/">
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "AI Impact on US Employment",
+  "url": "https://optpad.com/us/",
+  "description": "Interactive visualization of AI exposure across 342 US occupations"
+}
+</script>
+
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 </head>
 <body>
+<!-- Mobile menu toggle -->
+<button id="menuToggle" onclick="document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('open')" style="display:none;position:fixed;top:12px;left:12px;z-index:20;background:var(--bg2);border:1px solid rgba(255,255,255,0.1);color:var(--fg);width:40px;height:40px;border-radius:8px;cursor:pointer;align-items:center;justify-content:center;font-size:20px;">
+  ☰
+</button>
+<div id="sidebarOverlay" onclick="document.getElementById('sidebar').classList.remove('open');this.classList.remove('open')"></div>
+
     <div id="sidebar">
         <div>
             <h1>AI 对美国就业市场的影响</h1>
@@ -790,16 +602,88 @@
             }
         }
 
-        fetch("data.json")
-            .then(function(r) { return r.json(); })
+        // Show loading indicator
+        var loadingEl = document.createElement("div");
+        loadingEl.id = "loadingOverlay";
+        loadingEl.style.cssText = "position:fixed;top:0;left:220px;right:0;bottom:0;background:#0a0a0f;display:flex;align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:16px;";
+        loadingEl.innerHTML = '<div style="width:40px;height:40px;border:3px solid rgba(99,102,241,0.2);border-top-color:#6366f1;border-radius:50%;animation:spin 0.8s linear infinite;"></div><div style="color:#888;font-size:14px;">Loading occupation data...</div><style>@keyframes spin{to{transform:rotate(360deg)}}
+:root {
+  --bg: #0a0a0f;
+  --bg2: #12121a;
+  --fg: #e0e0e8;
+  --fg2: #888894;
+}
+
+[data-theme="light"] {
+  --bg: #f8f9fa;
+  --bg2: #ffffff;
+  --fg: #1a1a2e;
+  --fg2: #6c757d;
+}
+
+[data-theme="light"] body {
+  background: var(--bg);
+}
+
+[data-theme="light"] #sidebar {
+  background: var(--bg2);
+}
+
+
+@media (max-width: 768px) {
+  :root { --sidebar-w: 0px; }
+  #sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: none;
+  }
+  #sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+  }
+  canvas#canvas {
+    left: 0 !important;
+  }
+  #menuToggle {
+    display: flex !important;
+  }
+  #sidebarClose {
+    display: block !important;
+  }
+  #sidebarOverlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9;
+  }
+  #sidebarOverlay.open {
+    display: block;
+  }
+}
+
+</style>';
+        document.body.appendChild(loadingEl);
+
+        fetch("data.json?v=20260501b&t=" + Date.now())
+            .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
             .then(function(d) {
+                console.log("数据加载成功:", d.length, "条记录");
                 data = d;
                 computeStats();
                 drawGradientLegend();
                 resize();
+                loadingEl.style.transition = "opacity 0.3s";
+                loadingEl.style.opacity = "0";
+                setTimeout(function() { loadingEl.remove(); }, 300);
+            })
+            .catch(function(err) {
+                console.error("Failed to load data:", err);
+                loadingEl.innerHTML = '<div style="color:#ef4444;font-size:14px;">Load failed: ' + err.message + '<br><button onclick="location.reload()" style="margin-top:12px;padding:8px 16px;background:#6366f1;border:none;color:#fff;border-radius:6px;cursor:pointer;">Retry</button></div>';
             });
 
         window.addEventListener("resize", resize);
-    </script>
+
+</script>
 </body>
 </html>
